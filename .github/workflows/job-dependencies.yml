@@ -1,0 +1,37 @@
+name: Job Dependencies
+run-name: "Build ${{ github.ref_name }} @ ${{ github.sha }}"
+
+on:
+  push:
+    branches: [main]
+    
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    outputs:
+      image_tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: tag
+        run: echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+      - run: docker build -t myapp:${{ steps.tag.outputs.tag }} .
+
+  test:
+    needs: build                        # Wait for build to succeed
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "Running tests against ${{ needs.build.outputs.image_tag }}"
+
+  deploy-staging:
+    needs: [build, test]                # Both must pass
+    if: success()                       # Only if all needed jobs passed
+    runs-on: ubuntu-24.04
+    steps:
+      - run: ./deploy.sh ${{ needs.build.outputs.image_tag }} staging
+
+  notify-failure:
+    needs: [build, test, deploy-staging]
+    if: failure()                       # Run even if a needed job failed
+    runs-on: ubuntu-24.04
+    steps:
+      - run: ./notify-slack.sh "Deploy failed"
