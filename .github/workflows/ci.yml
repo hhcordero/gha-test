@@ -19,7 +19,7 @@ on:                                        # Event triggers block
         options: [staging, production]
       dry_run:
         type: boolean
-        default: false
+        default: true
 
 env:                                       # Workflow-level env vars
   REGISTRY: ghcr.io
@@ -60,3 +60,14 @@ jobs:
         run: pytest tests/ --tb=short -v --exitfirst
         env:                              # Step-level env (narrowest scope)
           DATABASE_URL: ${{ secrets.TEST_DB_URL }}
+
+      - name: Get version from file
+        id: version                          # id is required to reference outputs
+        run: |
+          VERSION=$(cat VERSION)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "BUILD_VERSION=$VERSION" >> $GITHUB_ENV  # available to all following steps
+    
+      - name: Use version
+        run: echo "Building ${{ steps.version.outputs.version }}"
+        # $BUILD_VERSION also works here as a plain shell var
