@@ -64,6 +64,7 @@ jobs:
       - name: Get version from file
         id: version                          # id is required to reference outputs
         run: |
+          echo "1.0.0" > VERSION          # or manage this file manually
           VERSION=$(cat VERSION)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "BUILD_VERSION=$VERSION" >> $GITHUB_ENV  # available to all following steps
