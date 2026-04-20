@@ -48,6 +48,6 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run tests
-        run: pytest --tb=short -q
+        run: pytest tests/ --tb=short -v --exitfirst
         env:                              # Step-level env (narrowest scope)
           DATABASE_URL: ${{ secrets.TEST_DB_URL }}
