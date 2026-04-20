@@ -5,9 +5,11 @@ on:                                        # Event triggers block
   push:
     branches: [main, 'release/*']
     paths-ignore: ['**.md', 'docs/**']    # Skip docs-only pushes
+  
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
+  
   workflow_dispatch:                       # Manual trigger
     inputs:
       environment:
@@ -22,11 +24,12 @@ on:                                        # Event triggers block
 env:                                       # Workflow-level env vars
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Avoid warning for nodejs 20 deprecation
 
 jobs:
   build:
     runs-on: ubuntu-24.04                  # Pin version, not ubuntu-latest
-    timeout-minutes: 20                    # Always set — prevents runaway bills
+    timeout-minutes: 1                    # Always set — prevents runaway bills
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,7 +43,7 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
-
+ 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
