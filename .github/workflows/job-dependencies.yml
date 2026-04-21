@@ -27,11 +27,11 @@ jobs:
     if: success()                       # Only if all needed jobs passed
     runs-on: ubuntu-24.04
     steps:
-      - run: ./deploy.sh ${{ needs.build.outputs.image_tag }} staging
+      - run: echo "${{ needs.build.outputs.image_tag }} staging"
 
   notify-failure:
     needs: [build, test, deploy-staging]
     if: failure()                       # Run even if a needed job failed
     runs-on: ubuntu-24.04
     steps:
-      - run: ./notify-slack.sh "Deploy failed"
+      - run: echo "Deploy failed - notify slack!"
